@@ -313,36 +313,6 @@ body {
   text-transform: uppercase; margin-top: 2.5rem;
 }
 
-/* ── RAD-SEKTION ── */
-#wheel-section {
-  margin-top: 3rem;
-  display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
-}
-.wheel-label {
-  font-family: var(--font-display); font-size: 0.65rem;
-  letter-spacing: 0.35em; color: var(--gold); text-transform: uppercase;
-}
-.wheel-hint {
-  font-family: var(--font-body); font-style: italic;
-  font-size: 0.85rem; color: var(--parchment-dark); opacity: 0.7;
-}
-#wheel-container {
-  width: 110px; height: 110px;
-  cursor: grab; position: relative;
-  transition: filter 0.3s;
-}
-#wheel-container:hover { filter: drop-shadow(0 0 12px rgba(200,146,42,0.5)); }
-#wheel-container:active { cursor: grabbing; }
-#wheel-svg {
-  width: 100%; height: 100%;
-  transition: transform 0.1s linear;
-}
-
-/* Rad leuchtet wenn aktiv gedreht */
-#wheel-container.spinning #wheel-svg circle:first-child {
-  stroke: var(--gold); opacity: 0.8;
-}
-
 /* ── MAPLIBRE OVERRIDES ── */
 .maplibregl-ctrl-attrib {
   background: rgba(15,10,5,0.65) !important;
@@ -370,19 +340,4 @@ body {
   .chapter-panel { width: 100%; }
   #chapter-nav { display: none; }
   .story-step { height: 90vh; }
-}
-
-/* Rad-Zustand: Route fertig gezeichnet */
-#wheel-container.done #wheel-svg circle:first-child {
-  stroke: var(--gold); opacity: 1;
-  animation: wheelPulse 1s ease-in-out infinite alternate;
-}
-@keyframes wheelPulse {
-  from { opacity: 0.6; }
-  to   { opacity: 1; }
-}
-/* Hinweis-Text aendern wenn fertig */
-#wheel-container.done + .wheel-hint::before {
-  content: 'Weiter drehen fuer Neustart - ';
-  color: var(--gold);
 }

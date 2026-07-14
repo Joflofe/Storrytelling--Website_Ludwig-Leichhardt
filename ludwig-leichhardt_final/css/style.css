@@ -445,7 +445,10 @@ background-position: center;
   background-image: var(--ink); background-size: cover; background-repeat: no-repeat; background-position: center; z-index: 10; overflow: hidden;
 }
 .finale-content {
-  text-align: center; width: 100vh; padding: 3rem 2rem;
+  text-align: center; width: 100%; max-width: 900px; padding: 3rem 2rem;
+}
+.achievement-image {
+  width: 300px; max-width: 60vw; height: auto;
 }
 .finale-ornament {
   font-family: var(--font-display); font-size: 1.2rem;
@@ -533,9 +536,30 @@ background-position: center;
     justify-content: center; padding: 1rem;
     align-items: flex-end; padding-bottom: 4vh;
   }
-  .chapter-panel { width: 100%; }
+  .chapter-panel { width: 100%; padding: 2.5rem 1.5rem; }
+  #panel-essington,
+  #panel-roper,
+  #panel-carpentaria,
+  #panel-start {
+    padding: 2.5rem 1.5rem;
+  }
   #chapter-nav { display: none; }
   .story-step { height: 90vh; }
+
+  .hero-content { padding: 2rem 1.25rem; }
+  .hero-eyebrow { font-size: 1rem; }
+
+  .chapter-title { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+  .chapter-body { font-size: 1.05rem; }
+  .chapter-subtitle { font-size: 0.85rem; }
+
+  .finale-content { padding: 2rem 1.25rem; }
+  .finale-title { font-size: clamp(2rem, 9vw, 2.8rem); }
+  .finale-ornament { font-size: 0.95rem; }
+  .achievement p { font-size: 1.05rem; }
+  .achievement-image { max-width: 70vw; }
+
+  .animation-flex-container { gap: 24px; }
 }
 
 /* Rad-Zustand: Route fertig gezeichnet */

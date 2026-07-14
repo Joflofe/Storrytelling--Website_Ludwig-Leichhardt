@@ -2,29 +2,6 @@
 (function () {
   'use strict';
 
-  // ── Inaktivitäts-Reset ────────────────────────────────────────
-  // Nach X Minuten ohne Interaktion lädt die Seite neu und startet
-  // wieder von oben (Hero-Section). X hier einstellen:
-  const INACTIVITY_TIMEOUT_MINUTES = 0.05; // TEMP: verification only
-
-  (function initInactivityReset() {
-    const timeoutMs = INACTIVITY_TIMEOUT_MINUTES * 60 * 1000;
-    let inactivityTimer;
-
-    function resetInactivityTimer() {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        window.location.reload();
-      }, timeoutMs);
-    }
-
-    ['mousemove', 'mousedown', 'keydown', 'scroll', 'wheel', 'touchstart'].forEach(evt => {
-      window.addEventListener(evt, resetInactivityTimer, { passive: true });
-    });
-
-    resetInactivityTimer();
-  })();
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
   } else {

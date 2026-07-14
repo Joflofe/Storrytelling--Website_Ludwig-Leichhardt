@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leichhardt - Die Port-Essington-Expedition</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-text">Karte wird geladen</div>
+  <div class="loading-bar"></div>
+</div>
+
+<nav id="chapter-nav" aria-label="Kapitelnavigation"></nav>
+
+<div id="route-progress-bar"><div id="route-progress-fill"></div></div>
+<div id="location-badge"></div>
+
+<div id="app">
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grain"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Ludwig Leichhardt &middot; 1844 &ndash; 1846</div>
+      <div class="hero-divider"></div>
+      <h1 class="hero-title">Die Port-Essington-<span>Expedition</span></h1>
+      <div class="hero-divider"></div>
+      <p class="hero-subtitle">Erste Expedition zur Durchquerung des australischen Kontinents</p>
+    </div>
+    <div class="hero-year">1844</div>
+    <div class="scroll-indicator">
+      <span>Scrollen</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- SCROLLYTELLING -->
+  <section id="scroll-container">
+    <div id="map-sticky">
+      <div id="map"></div>
+      <div id="map-vignette"></div>
+    </div>
+    <div id="story-steps"></div>
+  </section>
+
+  <!-- FINALE -->
+  <section id="finale">
+    <div class="finale-content">
+      <div class="finale-ornament">Bedeutung der Expedition</div>
+      <h2 class="finale-title">Ein Kontinent erschlossen</h2>
+      <div class="finale-divider"></div>
+      <div class="finale-achievements">
+        <div class="achievement">
+          <div class="achievement-icon">&#9670;</div>
+          <p>Erstmals Entdeckung eines Landweges zur Durchquerung des australischen Kontinents &ndash; Leichhardt wies nach, dass die zentrale Wueste nicht bis in den Norden reicht, sondern weite fruchtbare Flaechen fuer Weidewirtschaft und Ackerbau vorhanden sind.</p>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon">&#9670;</div>
+          <p>Entdeckung fossiler Pflanzenreste in verschiedensten Erdschichten. Leichhardt leitete daraus die Entstehung der Kohlefloeche und nahezu das Zeitalter ihrer Entstehung ab &ndash; ein bedeutender palaeontologischer Beitrag.</p>
+        </div>
+      </div>
+      <div class="finale-divider"></div>
+
+      <!-- RAD-SYMBOL fuer Loop -->
+      <div id="wheel-section">
+        <p class="wheel-label">Zum Anfang zurueck</p>
+        <div id="wheel-container">
+          <svg id="wheel-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Aeusserer Ring -->
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#C8922A" stroke-width="1.5" opacity="0.4"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#C8922A" stroke-width="0.5" opacity="0.2"/>
+            <!-- Speichen -->
+            <line x1="60" y1="8" x2="60" y2="112" stroke="#C8922A" stroke-width="1" opacity="0.3"/>
+            <line x1="8" y1="60" x2="112" y2="60" stroke="#C8922A" stroke-width="1" opacity="0.3"/>
+            <line x1="22" y1="22" x2="98" y2="98" stroke="#C8922A" stroke-width="1" opacity="0.3"/>
+            <line x1="98" y1="22" x2="22" y2="98" stroke="#C8922A" stroke-width="1" opacity="0.3"/>
+            <!-- Nabe -->
+            <circle cx="60" cy="60" r="8" fill="none" stroke="#C8922A" stroke-width="1.5"/>
+            <circle cx="60" cy="60" r="3" fill="#C8922A"/>
+            <!-- Pfeil-Hinweis -->
+            <path d="M60 16 L55 26 L65 26 Z" fill="#C8922A" opacity="0.6"/>
+          </svg>
+        </div>
+        <p class="wheel-hint">Rad drehen zum Zurueckspulen</p>
+      </div>
+
+      <p class="finale-credits">Scrollytelling &bull; Historische Daten: Ludwig Leichhardt &bull; Kartenmaterial: MapLibre + OpenMapTiles</p>
+    </div>
+  </section>
+
+</div>
+
+<script src="data/chapters.js"></script>
+<script src="js/map.js"></script>
+<script src="js/scroll.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

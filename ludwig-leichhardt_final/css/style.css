@@ -541,7 +541,10 @@ background-position: center;
   #panel-roper,
   #panel-carpentaria,
   #panel-start {
-    padding: 2.5rem 1.5rem;
+    padding: 2.25rem 3rem;
+  }
+  #panel-roper {
+    padding-bottom: 4rem;
   }
   #chapter-nav { display: none; }
   .story-step { height: 90vh; }

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koordinaten-Karte</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161922;
+    --border: #2a2d36;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --green: #39d353;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 1000;
+    flex-shrink: 0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .logo span { color: var(--muted); font-weight: 400; }
+
+  .coord-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    min-width: 200px;
+    text-align: center;
+    transition: border-color 0.2s, color 0.2s;
+    user-select: none;
+  }
+
+  .coord-box.copied {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .hint b { color: var(--accent2); font-weight: 600; }
+
+  #map {
+    flex: 1;
+    cursor: crosshair !important;
+    position: relative;
+  }
+
+  .leaflet-container {
+    cursor: crosshair !important;
+    background: #0d0f14;
+  }
+
+  .leaflet-grab { cursor: crosshair !important; }
+  .leaflet-dragging .leaflet-grab { cursor: grabbing !important; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    padding: 10px 22px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 9999;
+    pointer-events: none;
+    letter-spacing: 0.05em;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── CLICK HISTORY MARKERS ── */
+  .history-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent2);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    transition: opacity 0s;
+  }
+
+  .click-marker-pulse {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent2);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 0 rgba(255,107,53,0.6);
+    animation: pulse 1.2s ease-out forwards;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,107,53,0.6); }
+    70%  { box-shadow: 0 0 0 14px rgba(255,107,53,0); }
+    100% { box-shadow: 0 0 0 14px rgba(255,107,53,0); }
+  }
+
+  /* ── OVERLAY PANEL (Lichttisch) ── */
+  #overlayPanel {
+    position: absolute;
+    top: 60px;
+    right: 16px;
+    z-index: 2000;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  #overlayPanel h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #overlayPanel h3 .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 7px;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); color: var(--accent); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-zone .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .slider-row label { flex-shrink: 0; min-width: 72px; }
+
+  .slider-row input[type=range] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 4px;
+    cursor: pointer;
+  }
+
+  .slider-row .val {
+    color: var(--text);
+    min-width: 34px;
+    text-align: right;
+    font-size: 0.72rem;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn-sm {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    letter-spacing: 0.04em;
+  }
+
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm.danger:hover { border-color: #ff4444; color: #ff4444; }
+
+  /* Toggle panel button */
+  #togglePanel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  #togglePanel:hover, #togglePanel.active { border-color: var(--accent); color: var(--accent); }
+
+  .zoom-info {
+    font-size: 0.72rem;
+    color: var(--muted);
+    padding: 5px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .zoom-info span { color: var(--text); }
+
+  /* ── OVERLAY IMAGE (on map) ── */
+  #overlayImg {
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 500;
+    pointer-events: none;
+    display: none;
+    transform-origin: top left;
+    user-select: none;
+  }
+
+  #overlayImg.interactive { pointer-events: all; cursor: move; }
+
+  /* Resize handle */
+  #resizeHandle {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    z-index: 600;
+    cursor: nwse-resize;
+    display: none;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  /* Leaflet dark tweaks */
+  .leaflet-control-zoom a {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+  }
+
+  .leaflet-control-zoom a:hover {
+    background: var(--border) !important;
+    color: var(--accent) !important;
+  }
+
+  .leaflet-control-attribution {
+    background: rgba(13,15,20,0.75) !important;
+    color: var(--muted) !important;
+    font-size: 0.65rem !important;
+  }
+
+  .leaflet-control-attribution a { color: var(--muted) !important; }
+
+  /* History label tooltips */
+  .history-label {
+    background: rgba(13,15,20,0.85);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">GEO<span>COORDS</span></div>
+  <div class="coord-box" id="coordBox">bewege die maus…</div>
+  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <div class="zoom-info">Zoom: <span id="zoomLevel">3</span></div>
+    <button id="togglePanel">🖼 Lichttisch</button>
+    <div class="hint"><b>Klick</b> = kopieren &nbsp;|&nbsp; Scrollen = zoomen</div>
+  </div>
+</header>
+
+<div id="map">
+  <!-- overlay image lives here -->
+  <img id="overlayImg" src="" alt="Referenzkarte" draggable="false"/>
+  <div id="resizeHandle"></div>
+</div>
+
+<!-- Lichttisch Panel -->
+<div id="overlayPanel" style="display:none;">
+  <h3>🔦 Lichttisch <span class="badge">BETA</span></h3>
+
+  <div class="upload-zone" id="uploadZone">
+    <span class="icon">🗺</span>
+    JPG oder PNG hochladen
+    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg"/>
+  </div>
+
+  <div class="slider-row">
+    <label>Deckkraft</label>
+    <input type="range" id="opacitySlider" min="5" max="95" value="45"/>
+    <span class="val" id="opacityVal">45%</span>
+  </div>
+
+  <div class="slider-row">
+    <label>Größe</label>
+    <input type="range" id="scaleSlider" min="10" max="200" value="100"/>
+    <span class="val" id="scaleVal">100%</span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-sm" id="lockBtn" title="Bild fixieren / freigeben">🔓 verschiebbar</button>
+    <button class="btn-sm danger" id="clearImgBtn" title="Bild entfernen">✕ entfernen</button>
+  </div>
+
+  <div style="font-size:0.65rem;color:var(--muted);line-height:1.5;">
+    Bild verschieben: ziehen &nbsp;|&nbsp; Größe: Regler oder Ziehpunkt
+  </div>
+</div>
+
+<div class="toast" id="toast">📋 koordinaten kopiert!</div>
+
+<script>
+  // ─── MAP INIT ───────────────────────────────────────────────────
+  const map = L.map('map', {
+    center: [20, 10],
+    zoom: 3,
+    zoomControl: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20,
+  }).addTo(map);
+
+  const coordBox = document.getElementById('coordBox');
+  const toast    = document.getElementById('toast');
+  const zoomEl   = document.getElementById('zoomLevel');
+
+  let currentCoords = null;
+  let toastTimer    = null;
+  let clickMarker   = null;   // pulse marker (latest click)
+
+  function formatCoords(lat, lng) {
+    return `[${lng.toFixed(2)}, ${lat.toFixed(2)}]`;
+  }
+
+  // ─── CLICK HISTORY (max 10, fade) ───────────────────────────────
+  const HISTORY_MAX = 10;
+  const historyItems = []; // { marker, label, born }
+
+  function addHistoryPoint(lat, lng) {
+    const text = formatCoords(lat, lng);
+    const now  = Date.now();
+
+    // Dot icon
+    const dotIcon = L.divIcon({
+      className: '',
+      html: '<div class="history-dot"></div>',
+      iconSize: [10, 10],
+      iconAnchor: [5, 5],
+    });
+
+    const marker = L.marker([lat, lng], { icon: dotIcon, interactive: false }).addTo(map);
+
+    // Label
+    const labelIcon = L.divIcon({
+      className: '',
+      html: `<div class="history-label">${text}</div>`,
+      iconSize: [1, 1],
+      iconAnchor: [-8, 5],
+    });
+    const label = L.marker([lat, lng], { icon: labelIcon, interactive: false }).addTo(map);
+
+    historyItems.push({ marker, label, born: now });
+
+    // Remove oldest if over limit
+    if (historyItems.length > HISTORY_MAX) {
+      const old = historyItems.shift();
+      map.removeLayer(old.marker);
+      map.removeLayer(old.label);
+    }
+
+    // Start fade animation
+    scheduleFade();
+  }
+
+  let fadeRaf = null;
+  const FADE_DURATION = 12000; // 12 s total fade
+
+  function scheduleFade() {
+    if (fadeRaf) return;
+    fadeRaf = requestAnimationFrame(fadeLoop);
+  }
+
+  function fadeLoop() {
+    const now = Date.now();
+    let anyAlive = false;
+
+    historyItems.forEach(item => {
+      const age  = now - item.born;
+      const t    = Math.min(age / FADE_DURATION, 1); // 0 → 1
+      const op   = 1 - t;
+      // Apply via the underlying DOM element
+      const dotEl   = item.marker.getElement();
+      const labelEl = item.label.getElement();
+      if (dotEl)   dotEl.style.opacity   = op;
+      if (labelEl) labelEl.style.opacity = op;
+      if (t < 1) anyAlive = true;
+      else {
+        if (dotEl)   dotEl.style.opacity   = 0;
+        if (labelEl) labelEl.style.opacity = 0;
+      }
+    });
+
+    if (anyAlive) {
+      fadeRaf = requestAnimationFrame(fadeLoop);
+    } else {
+      fadeRaf = null;
+    }
+  }
+
+  // ─── MAP EVENTS ─────────────────────────────────────────────────
+  map.on('mousemove', (e) => {
+    const { lat, lng } = e.latlng;
+    currentCoords = { lat, lng };
+    coordBox.textContent = formatCoords(lat, lng);
+    coordBox.classList.remove('copied');
+  });
+
+  map.on('mouseout', () => {
+    coordBox.textContent = 'bewege die maus…';
+    currentCoords = null;
+    coordBox.classList.remove('copied');
+  });
+
+  map.on('zoom', () => { zoomEl.textContent = map.getZoom(); });
+
+  map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    const text = formatCoords(lat, lng);
+
+    // Copy
+    navigator.clipboard.writeText(text).then(() => showToast(text)).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast(text);
+    });
+
+    coordBox.textContent = text;
+    coordBox.classList.add('copied');
+
+    // Pulse marker
+    if (clickMarker) map.removeLayer(clickMarker);
+    const icon = L.divIcon({
+      className: '',
+      html: '<div class="click-marker-pulse"></div>',
+      iconSize: [14, 14], iconAnchor: [7, 7],
+    });
+    clickMarker = L.marker([lat, lng], { icon, interactive: false }).addTo(map);
+    setTimeout(() => { if (clickMarker) { map.removeLayer(clickMarker); clickMarker = null; } }, 1400);
+
+    // Add to history
+    addHistoryPoint(lat, lng);
+  });
+
+  function showToast(coords) {
+    toast.textContent = `📋 ${coords} kopiert!`;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // ─── LICHTTISCH / OVERLAY IMAGE ─────────────────────────────────
+  const overlayImg   = document.getElementById('overlayImg');
+  const resizeHandle = document.getElementById('resizeHandle');
+  const opacitySlider = document.getElementById('opacitySlider');
+  const opacityVal    = document.getElementById('opacityVal');
+  const scaleSlider   = document.getElementById('scaleSlider');
+  const scaleVal      = document.getElementById('scaleVal');
+  const lockBtn       = document.getElementById('lockBtn');
+  const clearImgBtn   = document.getElementById('clearImgBtn');
+  const fileInput     = document.getElementById('fileInput');
+  const uploadZone    = document.getElementById('uploadZone');
+  const overlayPanel  = document.getElementById('overlayPanel');
+  const togglePanel   = document.getElementById('togglePanel');
+
+  let imgX = 80, imgY = 80;
+  let imgW = 0, imgH = 0;
+  let imgScale = 1.0;
+  let imgOpacity = 0.45;
+  let isLocked = false;
+  let isDragging = false;
+  let isResizing = false;
+  let dragStartX, dragStartY, dragImgX, dragImgY;
+  let resizeStartX, resizeStartW, resizeStartH;
+
+  // Panel toggle
+  togglePanel.addEventListener('click', () => {
+    const visible = overlayPanel.style.display !== 'none';
+    overlayPanel.style.display = visible ? 'none' : 'flex';
+    togglePanel.classList.toggle('active', !visible);
+  });
+
+  // File load
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    loadImageFile(file);
+  });
+
+  // Drag-and-drop on upload zone
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && (file.type.startsWith('image/'))) loadImageFile(file);
+  });
+
+  function loadImageFile(file) {
+    const url = URL.createObjectURL(file);
+    overlayImg.onload = () => {
+      imgW = overlayImg.naturalWidth;
+      imgH = overlayImg.naturalHeight;
+      // Fit within map initially (max 50% of map width)
+      const mapW = document.getElementById('map').offsetWidth;
+      const maxW = mapW * 0.5;
+      if (imgW > maxW) {
+        imgScale = maxW / imgW;
+      } else {
+        imgScale = 1;
+      }
+      imgX = 80; imgY = 80;
+      applyOverlay();
+      overlayImg.style.display = 'block';
+      resizeHandle.style.display = 'block';
+      uploadZone.innerHTML = `<span class="icon">✅</span><span style="color:var(--green);font-size:0.7rem;">${file.name}</span><input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg"/>`;
+      document.getElementById('fileInput').addEventListener('change', (e) => {
+        const f = e.target.files[0]; if (f) loadImageFile(f);
+      });
+    };
+    overlayImg.src = url;
+  }
+
+  function applyOverlay() {
+    const w = imgW * imgScale;
+    const h = imgH * imgScale;
+    overlayImg.style.left    = imgX + 'px';
+    overlayImg.style.top     = imgY + 'px';
+    overlayImg.style.width   = w + 'px';
+    overlayImg.style.height  = h + 'px';
+    overlayImg.style.opacity = imgOpacity;
+    resizeHandle.style.left  = (imgX + w - 7) + 'px';
+    resizeHandle.style.top   = (imgY + h - 7) + 'px';
+  }
+
+  // Opacity
+  opacitySlider.addEventListener('input', () => {
+    imgOpacity = opacitySlider.value / 100;
+    opacityVal.textContent = opacitySlider.value + '%';
+    overlayImg.style.opacity = imgOpacity;
+  });
+
+  // Scale
+  scaleSlider.addEventListener('input', () => {
+    imgScale = scaleSlider.value / 100;
+    scaleVal.textContent = scaleSlider.value + '%';
+    applyOverlay();
+  });
+
+  // Lock toggle
+  lockBtn.addEventListener('click', () => {
+    isLocked = !isLocked;
+    lockBtn.textContent = isLocked ? '🔒 fixiert' : '🔓 verschiebbar';
+    overlayImg.classList.toggle('interactive', !isLocked);
+    resizeHandle.style.display = (isLocked || overlayImg.style.display === 'none') ? 'none' : 'block';
+  });
+
+  // Clear image
+  clearImgBtn.addEventListener('click', () => {
+    overlayImg.style.display = 'none';
+    overlayImg.src = '';
+    resizeHandle.style.display = 'none';
+    uploadZone.innerHTML = `<span class="icon">🗺</span>JPG oder PNG hochladen<input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg"/>`;
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const f = e.target.files[0]; if (f) loadImageFile(f);
+    });
+  });
+
+  // ─── DRAG ───────────────────────────────────────────────────────
+  overlayImg.addEventListener('mousedown', (e) => {
+    if (isLocked) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragImgX   = imgX;
+    dragImgY   = imgY;
+    map.dragging.disable();
+    e.preventDefault();
+  });
+
+  // ─── RESIZE ─────────────────────────────────────────────────────
+  resizeHandle.addEventListener('mousedown', (e) => {
+    isResizing  = true;
+    resizeStartX = e.clientX;
+    resizeStartW = imgW * imgScale;
+    resizeStartH = imgH * imgScale;
+    map.dragging.disable();
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      imgX = dragImgX + (e.clientX - dragStartX);
+      imgY = dragImgY + (e.clientY - dragStartY);
+      applyOverlay();
+    }
+    if (isResizing) {
+      const dx     = e.clientX - resizeStartX;
+      const newW   = Math.max(40, resizeStartW + dx);
+      imgScale     = newW / imgW;
+      // sync scale slider (capped at range)
+      const pct    = Math.round(imgScale * 100);
+      scaleSlider.value = Math.min(200, Math.max(10, pct));
+      scaleVal.textContent = scaleSlider.value + '%';
+      applyOverlay();
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging || isResizing) {
+      isDragging  = false;
+      isResizing  = false;
+      map.dragging.enable();
+    }
+  });
+
+  // Touch support for drag
+  overlayImg.addEventListener('touchstart', (e) => {
+    if (isLocked) return;
+    const t = e.touches[0];
+    isDragging = true;
+    dragStartX = t.clientX;
+    dragStartY = t.clientY;
+    dragImgX   = imgX;
+    dragImgY   = imgY;
+    map.dragging.disable();
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const t = e.touches[0];
+    imgX = dragImgX + (t.clientX - dragStartX);
+    imgY = dragImgY + (t.clientY - dragStartY);
+    applyOverlay();
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (isDragging) { isDragging = false; map.dragging.enable(); }
+  });
+</script>
+</body>
+</html>

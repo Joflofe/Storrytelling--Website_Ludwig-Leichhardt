@@ -45,7 +45,7 @@ var SATELLITE_STYLE = {
   sources: {
     "protomaps": {
       type: "vector",
-      url: "pmtiles://tiles/australien.pmtiles"
+      url: "pmtiles://https://raw.githubusercontent.com/Joflofe/Storrytelling--Website_Ludwig-Leichhardt/main/ludwig-leichhardt_final/tiles/australien.pmtiles"
     }
   },
   layers: [

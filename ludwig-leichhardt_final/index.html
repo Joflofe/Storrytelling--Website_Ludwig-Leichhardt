@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leichhardt - Die Port-Essington-Expedition</title>
+  <script src="libs/pmtiles.js"></script>
+  <link rel="stylesheet" href="libs/maplibre-gl.css" />
+  <script src="libs/maplibre-gl.js"></script>
+  <script src="/libs/lottie-player.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-text">Karte wird geladen</div>
+  <div class="loading-bar"></div>
+</div>
+
+<nav id="chapter-nav" aria-label="Kapitelnavigation"></nav>
+
+<div id="route-progress-bar"><div id="route-progress-fill"></div></div>
+<div id="location-badge"></div>
+
+<div id="app">
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grain"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Ludwig Leichhardt <br> 1844 &ndash; 1846</div>
+      <div class="hero-divider"></div>
+      <h1 class="hero-title">Die Port-Essington-<span>Expedition</span></h1>
+      <p class="hero-subtitle">Erste Expedition zur Durchquerung des australischen Kontinents</p>
+    </div>
+
+<section class="animation-section">
+  <div class="animation-flex-container">
+
+      <lottie-player 
+          src="video/Lottie1.json" 
+          background="transparent" 
+          speed="0.6" 
+          style="width: 100px; height: 100px;" 
+          loop 
+          autoplay>
+      </lottie-player>
+
+
+
+      <lottie-player 
+          src="video/Lottie2.json" background="transparent" 
+          speed="0.6" 
+          style="width: 100px; height: 100px;" 
+          loop 
+          autoplay>
+      </lottie-player>
+    </div>
+
+  </div>
+</section>
+ 
+
+
+  <!-- SCROLLYTELLING -->
+  <section id="scroll-container">
+    <div id="map-sticky">
+      <div id="map"></div>
+      <div id="map-vignette"></div>
+    </div>
+    <div id="story-steps"></div>
+  </section>
+
+  <!-- FINALE -->
+  <section id="finale">
+    <div class="finale-content">
+      <div class="finale-ornament"></div>
+      <h2 class="finale-title">Bedeutung der Expedition</h2>
+      <div class="finale-divider"></div>
+                <img src="pictures/Leichhardt Portrait.png" alt="Porträt von Ludwig Leichhardt" class="achievement-image" width="300px"  height="auto" /> 
+      <div class="finale-achievements">
+        <div class="achievement">
+          <div class="achievement-icon">&#9670;</div>
+          <p>Erstmalige Entdeckung eines Landweges zur Durchquerung des australischen Kontinents &ndash; Leichhardt wies nach, dass die zentrale Wüste nicht bis in den Norden reicht, sondern weite fruchtbare Flächen für Weidewirtschaft und Ackerbau vorhanden sind.</p>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon">&#9670;</div>
+          <p> Ludwig Leichhardt untersuchte bedeutende Kohlevorkommen in Queensland. Durch das Sammeln fossiler Pflanzenreste in diesen Kohleflözen &ndash; Gesteinsschichten aus verdichteten, uralten <br> Pflanzenresten &ndash; konnte er deren Entstehung und das geologische Zeitalter annähernd bestimmen. Dieser paläontologische Beitrag trieb die Erforschung der australischen Geologie maßgeblich voran.</p>
+        </div>
+      </div>
+      <div class="finale-divider"></div>
+
+      <!-- <p class="finale-credits">Scrollytelling &bull; Historische Daten: Ludwig Leichhardt &bull; Kartenmaterial: MapLibre + OpenMapTiles</p>-->
+    </div>
+  </section>
+
+</div>
+
+<script src="data/chapters.js"></script>
+<script src="js/map.js"></script>
+<script src="js/scroll.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener("click", function () {
+    window.location.href = "index_cz.html";
+  });
+</script>
+
+</body>
+</html>

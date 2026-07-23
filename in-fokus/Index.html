@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autofokus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Basis-Styling */
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body { 
+      background: #0a0a0a; 
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Roboto Mono', Arial, sans-serif;
+      margin-bottom: 30px;
+      font-size: 3.5rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-align: left;
+      line-height: 0.8;
+      text-align: left;
+    }
+h1{
+  color: rgb(231, 139, 64);
+}
+h3{
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 2rem;
+      font-weight: 100;
+}
+    p {
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: 1.6rem;
+      line-height: 1.4;
+      max-width: 800px;
+      font-weight: 100;
+    }
+
+    /* 1. Intro Sektion (Video im Hintergrund) */
+    .intro-section {
+  
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column; 
+      justify-content: flex-end;
+      align-items: flex-start; 
+      overflow: hidden;
+      padding-left: 8%;
+      padding-bottom: 4%; 
+  
+    }
+
+    .intro-section video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translateX(-50%) translateY(-50%);
+      z-index: 1;
+      object-fit: cover;
+      opacity: 0.6; /* Dunkelt das Video leicht ab */
+    }
+
+    .intro-content {
+      position: relative;
+      z-index: 2;
+      text-align: left; 
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+    }
+
+    /* 2. Normale Text-Sektionen */
+    .text-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 50px 8%;
+      background: #0a0a0a;
+      text-align: left; 
+      position: relative;
+      z-index: 10;
+    }
+
+    /* 3. Scroll-Animations-Sektionen (PNG Sequenz) */
+    .sequence-section {
+      /* Die Höhe bestimmt, wie lange man scrollen muss, um die Sequenz abzuspielen. 
+         400vh bedeutet 4 Bildschirmlängen. */
+      height: 400vh; 
+      position: relative;
+    }
+
+    .sticky-container {
+      position: sticky;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Verhält sich wie background-size: cover */
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="intro-section">
+    <video autoplay loop muted playsinline>
+      <source src="assets/video/intro.mp4" type="video/mp4">
+    </video>
+    <div class="intro-content">
+      <h1>Autofokus</h1>
+      <h3>wie funktioniert der eigentlich?</h3>
+    </div>
+  </section>
+
+  <section class="text-section">
+    <h2>Dein Bild ist nicht scharf?</h2>
+    <p>Das ist völlig normal, du hast ja noch gar nicht fokussiert!
+Moderne Kameras haben dafür einen so genannten Autofokus.</p>
+  </section>
+
+  <section class="sequence-section" id="sequence-1">
+    <div class="sticky-container">
+      <canvas id="canvas-1"></canvas>
+    </div>
+  </section>
+
+  <section class="text-section">
+    <h2>Der Auslöser</h2>
+    <p>Wenn man den Auslöser halb durchdrückt, sucht die Kamera innerhalb des Fokusfeldes nach scharfen Kanten oder hohen Kontrasten im Bild.</p>
+  </section>
+
+  <section class="sequence-section" id="sequence-2">
+    <div class="sticky-container">
+      <canvas id="canvas-2"></canvas>
+    </div>
+  </section>
+  
+  <section class="text-section">
+    <h2>Der Bildsensor</h2>
+    <p>Bei der Phasenerkennung wird das einfallende Licht in zwei Teilstrahlen aufgeteilt. Spezielle Sensoren vergleichen diese Lichtstrahlen und messen eine Phasendifferenz - Messprinzip des Autofokuses. Dadurch erkennt die Kamera nicht nur, dass das Motiv unscharf ist, sondern auch in welche Richtung und wie weit der Fokus verstellt werden muss.</p>
+  </section>
+
+  <section class="sequence-section" id="sequence-3">
+    <div class="sticky-container">
+      <canvas id="canvas-3"></canvas>
+    </div>
+  </section>
+  
+  <section class="text-section">
+    <h2>Objektivmotoren</h2>
+    <p>Die Information, in welche Richtung gedreht werden muss, wird an die Motoren im Objektiv weitergegeben. Moderne Objektive nutzen meist Ultraschall- oder Linearmotoren, die die Linsengruppen schnell, präzise und nahezu geräuschlos bewegen. Der Fokus wird kontinuierlich angepasst, bis keine Phasendifferenz mehr vorhanden ist und das Motiv scharf auf dem Sensor abgebildet wird.</p>
+  </section>
+
+ <section class="sequence-section" id="sequence-4">
+    <div class="sticky-container">
+      <canvas id="canvas-4"></canvas>
+    </div>
+  </section>
+  
+  <section class="text-section">
+    <h2>Scharf?</h2>
+    <p>Jetzt sollte das Bild auf dem Display scharf angezeigt werden.</p>
+  </section>
+
+  <section class="sequence-section" id="sequence-5">
+    <div class="sticky-container">
+      <canvas id="canvas-5"></canvas>
+    </div>
+  </section>
+  
+  <section class="text-section">
+    <h2>Noch ein Schritt?</h2>
+    <p>Den Auslöser voll durchdrücken und das Bild sitzt im Kasten.</p>
+  </section>
+
+
+
+  <script>
+    /* --- KONFIGURATION DER SEQUENZEN --- */
+    // Hier definierst du, wo deine Bilder liegen und wie viele es sind.
+    const sequences = [
+      {
+        sectionId: 'sequence-1',
+        canvasId: 'canvas-1',
+        folder: 'assets/seq1/',
+        prefix: 'time', // z.B. frame_0001.png
+        extension: '.png',
+        frameCount: 250, // Wie viele Bilder hat diese Sequenz?
+        images: []       // Hier werden die geladenen Bilder gespeichert
+      },
+      {
+        sectionId: 'sequence-2',
+        canvasId: 'canvas-2',
+        folder: 'assets/seq2/',
+        prefix: 'time', // z.B. img_0001.png
+        extension: '.png',
+        frameCount: 85, 
+        images: []
+      },
+      {
+        sectionId: 'sequence-3',
+        canvasId: 'canvas-3',
+        folder: 'assets/seq3/',
+        prefix: 'time', // z.B. img_0001.png
+        extension: '.png',
+        frameCount: 200, 
+        images: []
+      },
+      {
+        sectionId: 'sequence-4',
+        canvasId: 'canvas-4',
+        folder: 'assets/seq4/',
+        prefix: 'time', // z.B. img_0001.png
+        extension: '.png',
+        frameCount: 95, 
+        images: []
+      },
+      {
+        sectionId: 'sequence-5',
+        canvasId: 'canvas-5',
+        folder: 'assets/seq5/',
+        prefix: 'time', // z.B. img_0001.png
+        extension: '.png',
+        frameCount: 120, 
+        images: []
+      }
+    ];
+
+    // Hilfsfunktion: Zahlen mit Nullen auffüllen (z.B. 1 -> "0001")
+    function padNumber(num, size = 4) {
+      let s = String(num);
+      while (s.length < size) s = "0" + s;
+      return s;
+    }
+
+    // Bilder vorladen, damit das Scrollen nicht ruckelt
+    function preloadImages() {
+      sequences.forEach(seq => {
+        for (let i = 1; i <= seq.frameCount; i++) {
+          const img = new Image();
+          // Erzeugt Pfade wie: assets/seq1/frame_0001.png
+          img.src = `${seq.folder}${seq.prefix}${padNumber(i)}${seq.extension}`;
+          seq.images.push(img);
+        }
+      });
+    }
+
+    // Zeichnet ein Bild so auf das Canvas, dass es immer den ganzen Bildschirm füllt (Cover)
+    function drawImageCover(ctx, img, canvas) {
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+      
+      const canvasRatio = canvas.width / canvas.height;
+      const imgRatio = img.width / img.height;
+      let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+      if (canvasRatio > imgRatio) {
+        drawWidth = canvas.width;
+        drawHeight = canvas.width / imgRatio;
+        offsetY = (canvas.height - drawHeight) / 2;
+      } else {
+        drawWidth = canvas.height * imgRatio;
+        drawHeight = canvas.height;
+        offsetX = (canvas.width - drawWidth) / 2;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    }
+
+    // Initialisierung und Scroll-Logik
+    function initScrollytelling() {
+      preloadImages();
+
+      sequences.forEach(seq => {
+        const section = document.getElementById(seq.sectionId);
+        const canvas = document.getElementById(seq.canvasId);
+        const ctx = canvas.getContext('2d');
+
+        // Canvas Größe anpassen
+        function resizeCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          // Erstes Bild sofort zeichnen, sobald es geladen ist
+          if(seq.images[0]) {
+            seq.images[0].onload = () => drawImageCover(ctx, seq.images[0], canvas);
+            drawImageCover(ctx, seq.images[0], canvas); // Fallback falls schon im Cache
+          }
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Scroll Event für diese spezifische Sektion
+        window.addEventListener('scroll', () => {
+          const rect = section.getBoundingClientRect();
+          const scrollDistance = section.offsetHeight - window.innerHeight;
+          
+          // Berechne den Fortschritt von 0 bis 1, ABER nur innerhalb dieser Sektion
+          let progress = -rect.top / scrollDistance;
+          
+          // Begrenze den Fortschritt strikt zwischen 0 und 1
+          progress = Math.max(0, Math.min(1, progress));
+
+          // Welches Bild soll anhand des Fortschritts gezeigt werden?
+          let frameIndex = Math.floor(progress * (seq.frameCount - 1));
+
+          // Bild auf das Canvas zeichnen (mit requestAnimationFrame für flüssige 60fps)
+          requestAnimationFrame(() => {
+            if(seq.images[frameIndex]) {
+              drawImageCover(ctx, seq.images[frameIndex], canvas);
+            }
+          });
+        });
+      });
+    }
+
+    // Starte das Skript, sobald die Seite geladen ist
+    document.addEventListener("DOMContentLoaded", initScrollytelling);
+
+    /* --- INAKTIVITÄTS-RESET --- */
+    const INACTIVITY_MINUTES = 0.25; // Nach so vielen Minuten ohne Interaktion neu starten
+    let inactivityTimer;
+
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
+    function resetInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        if (window.scrollY === 0) return; // Schon oben und inaktiv -> kein Reload nötig
+        window.scrollTo(0, 0);
+        window.location.reload();
+      }, INACTIVITY_MINUTES * 60 * 1000);
+    }
+
+    ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "wheel"].forEach(evt => {
+      window.addEventListener(evt, resetInactivityTimer, { passive: true });
+    });
+
+    resetInactivityTimer();
+
+  </script>
+</body>
+</html>
